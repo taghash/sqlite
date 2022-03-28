@@ -170,7 +170,6 @@ func openConn(path string, flags ...OpenFlags) (*Conn, error) {
 		}
 	}
 
-
 	return conn, nil
 }
 
@@ -702,6 +701,12 @@ func (stmt *Stmt) findBindName(loc string, param string) int {
 		stmt.bindErr = reserr("Stmt."+loc, stmt.query, "unknown parameter: "+param, C.SQLITE_ERROR)
 	}
 	return pos
+}
+
+// HasParam returns a boolean if the a bind variable with given name exists
+func (stmt *Stmt) HasParam(param string) bool {
+	_, has := stmt.bindIndex[param]
+	return has
 }
 
 // DataCount returns the number of columns in the current row of the result
