@@ -709,6 +709,13 @@ func (stmt *Stmt) HasParam(param string) bool {
 	return has
 }
 
+// IsReadOnly returns true if the prepared statement makes no direct changes to the content of the database file.
+//
+// see also: https://sqlite.org/c3ref/stmt_readonly.html
+func (stmt *Stmt) IsReadOnly() bool {
+	return int(C.sqlite3_stmt_readonly(stmt.stmt)) != 0
+}
+
 // DataCount returns the number of columns in the current row of the result
 // set of prepared statement.
 //
