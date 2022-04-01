@@ -68,7 +68,7 @@ type Pool struct {
 //	SQLITE_OPEN_URI
 //	SQLITE_OPEN_NOMUTEX
 func Open(uri string, flags sqlite.OpenFlags, poolSize int) (pool *Pool, err error) {
-	return OpenInit(nil, uri, flags, poolSize, "")
+	return OpenInit(nil, uri, flags, poolSize, nil)
 }
 
 // OpenInit opens a fixed-size pool of SQLite connections, each initialized
@@ -89,7 +89,7 @@ func Open(uri string, flags sqlite.OpenFlags, poolSize int) (pool *Pool, err err
 // that running it multiple times is the same as running it once. For example
 // do not run INSERT in any of the initScripts or else it may create duplicate
 // data unintentionally or fail.
-func OpenInit(ctx context.Context, uri string, flags sqlite.OpenFlags, poolSize int, initScript string) (pool *Pool, err error) {
+func OpenInit(ctx context.Context, uri string, flags sqlite.OpenFlags, poolSize int, init func(*sqlite.Conn) error) (pool *Pool, err error) {
 	if uri == ":memory:" {
 		return nil, strerror{msg: `sqlite: ":memory:" does not work with multiple connections, use "file::memory:?mode=memory"`}
 	}
@@ -127,9 +127,9 @@ func OpenInit(ctx context.Context, uri string, flags sqlite.OpenFlags, poolSize 
 		p.free <- conn
 		p.all[conn] = func() {}
 
-		if initScript != "" {
+		if init != nil {
 			conn.SetInterrupt(ctx.Done())
-			if err := ExecScript(conn, initScript); err != nil {
+			if err := init(conn); err != nil {
 				return nil, err
 			}
 			conn.SetInterrupt(nil)
