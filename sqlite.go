@@ -1068,6 +1068,13 @@ func (stmt *Stmt) ColumnFloat(col int) float64 {
 	return float64(C.sqlite3_column_double(stmt.stmt, C.int(col)))
 }
 
+// ColumnValue returns a query result as a Value.
+//
+// Column indices start at 0.
+func (stmt *Stmt) ColumnValue(col int) *Value {
+	return &Value{ptr: C.sqlite3_column_value(stmt.stmt, C.int(col))}
+}
+
 // ColumnLen returns the number of bytes in a query result.
 //
 // Column indices start at 0.
@@ -1152,6 +1159,15 @@ func (stmt *Stmt) GetFloat(colName string) float64 {
 		return 0
 	}
 	return stmt.ColumnFloat(col)
+}
+
+// GetValue returns a query result value for colName as a Value.
+func (stmt *Stmt) GetValue(colName string) *Value {
+	col, found := stmt.colNames[colName]
+	if !found {
+		return nil
+	}
+	return stmt.ColumnValue(col)
 }
 
 // GetLen returns the number of bytes in a query result for colName.
