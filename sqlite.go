@@ -650,9 +650,7 @@ func (stmt *Stmt) Step() (rowReturned bool, err error) {
 			stmt.tracerTask = nil
 		}
 	}
-	if err != nil {
-		C.sqlite3_reset(stmt.stmt)
-	}
+
 	stmt.lastHasRow = rowReturned
 	return rowReturned, err
 }
