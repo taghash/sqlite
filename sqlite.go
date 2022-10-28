@@ -188,6 +188,9 @@ func (conn *Conn) Close() error {
 	return reserr("Conn.Close", "", "", res)
 }
 
+// UnderlyingConnection returns the underlying C.sqlite3 database connection object.
+func (conn *Conn) UnderlyingConnection() unsafe.Pointer { return unsafe.Pointer(conn.conn) }
+
 func (conn *Conn) GetAutocommit() bool {
 	return int(C.sqlite3_get_autocommit(conn.conn)) != 0
 }
